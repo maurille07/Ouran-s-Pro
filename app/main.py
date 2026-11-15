@@ -714,6 +714,38 @@ async def queue_clear() -> dict[str, Any]:
 
 
 # --------------------------------------------------------------------------
+# API: starting fresh
+# --------------------------------------------------------------------------
+@app.post("/api/transcript/clear")
+async def transcript_clear() -> dict[str, Any]:
+    """Empty the live transcript on every operator screen. Detections are kept."""
+    runtime = rt()
+    runtime.transcript.clear()
+    await runtime.hub.broadcast({"type": "transcript_clear"})
+    log.info("TRANSCRIPT cleared")
+    return {"ok": True}
+
+
+@app.post("/api/session/reset")
+async def session_reset() -> dict[str, Any]:
+    """Start fresh (new sermon, new service): empty transcript, detections and projector.
+
+    Listening keeps running if it is on. The detector also forgets which chapter was
+    being read and which verses it suggested, so nothing carries over.
+    """
+    runtime = rt()
+    runtime.transcript.clear()
+    runtime._recent_words.clear()
+    runtime.state.clear_queue()
+    runtime.state.clear()
+    if runtime.detector is not None:
+        runtime.detector.reset()
+    await runtime.hub.broadcast({"type": "transcript_clear"})
+    log.info("SESSION reset")
+    return await runtime.publish()
+
+
+# --------------------------------------------------------------------------
 # WebSocket
 # --------------------------------------------------------------------------
 @app.websocket("/ws")

@@ -169,6 +169,14 @@ In **Find a verse**, type and press `Enter` (shows the first result):
 - A reference: `jn 3 16`, `romains 8:28`, `1 cor 13 4-7`, `psalm 23`
 - A few words: `God so loved`, `l'eternel est mon berger`
 
+### Clearing and starting fresh
+
+- **Clear** (top right of the live transcript) empties the transcript only. Detections stay.
+- **Start fresh** (command bar) is for a new sermon or a new service: it empties the
+  transcript and the detections, clears the projector, and makes the program forget
+  which chapter was being read. It asks for confirmation first. Listening keeps
+  running and your settings are kept.
+
 ### Translation
 
 The buttons at the top (**KJV · LSG · Both**) choose the Bible on the projector.

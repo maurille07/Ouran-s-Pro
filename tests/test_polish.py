@@ -121,3 +121,35 @@ def test_broken_settings_file_falls_back_to_defaults(tmp_path) -> None:
     path.write_text('{"theme": "neon", "font_scale": "big", "language": "fr", "unknown": 1}', encoding="utf-8")
     loaded = config.Settings.load(path)
     assert loaded.theme == "dark" and loaded.font_scale == 1.0 and loaded.language == "fr"
+
+
+# ------------------------------------------------------- clearing / starting fresh
+def test_clear_transcript_keeps_detections(client) -> None:
+    hear(client, 1, "Please turn to John 3:16.")
+    with client.websocket_connect("/ws") as ws:
+        ws.receive_json()                                           # state snapshot
+        assert len(ws.receive_json()["lines"]) == 1                 # transcript history for late joiners
+        assert client.post("/api/transcript/clear").json() == {"ok": True}
+        assert ws.receive_json() == {"type": "transcript_clear"}
+    with client.websocket_connect("/ws") as ws:
+        ws.receive_json()
+        ws.send_json({"type": "hello", "role": "display"})
+        assert ws.receive_json()["type"] == "state"                 # no transcript history any more
+    assert [q["reference"] for q in client.get("/api/state").json()["queue"]] == ["John 3:16"]
+
+
+def test_start_fresh_resets_everything_but_settings(client) -> None:
+    client.post("/api/settings", json={"theme": "church"})
+    hear(client, 1, "Open to Romans chapter 8.")
+    hear(client, 2, "Look at verse 28.")
+    client.post("/api/show", json={"book_id": 45, "chapter": 8, "verse_start": 28})
+
+    snap = client.post("/api/session/reset").json()
+    assert snap["queue"] == [] and snap["screen"] == "clear" and snap["panels"] == []
+    assert snap["settings"]["theme"] == "church"                    # settings are kept
+    assert len(client.app.state.rt.transcript) == 0
+
+    hear(client, 3, "Now verse 5.")                                 # the old chapter is forgotten
+    assert client.get("/api/state").json()["queue"] == []
+    hear(client, 4, "Romans 8:28 again.")                           # and so is the "already suggested" memory
+    assert [q["reference"] for q in client.get("/api/state").json()["queue"]] == ["Romans 8:28"]

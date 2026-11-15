@@ -25,6 +25,7 @@
     <symbol id="i-blank" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="m9.5 8 5 5m0-5-5 5M8.5 20h7"/></symbol>
     <symbol id="i-black" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2" fill="currentColor"/><path d="M8.5 20h7"/></symbol>
     <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></symbol>
+    <symbol id="i-fresh" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.05-4.95M19.5 4.5v4.5H15"/></symbol>
     <symbol id="i-open" viewBox="0 0 24 24"><path d="M13.5 5H19v5.5M19 5l-8 8M10 6.5H6.5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V14"/></symbol>
   </svg>
 
@@ -92,6 +93,10 @@
     </div>
 
     <div class="group end">
+      <button class="btn subtle" id="btn-fresh"
+              title="New sermon or new service: empties the transcript, the detections and the projector">
+        <svg aria-hidden="true"><use href="#i-fresh"/></svg><span>Start fresh</span>
+      </button>
       <a class="btn subtle" href="/display" target="ouranos-display"
          title="Open the projector screen in a new window. Drag it to the projector and double-click it for full screen.">
         <svg aria-hidden="true"><use href="#i-open"/></svg><span>Projector screen</span>
@@ -116,7 +121,10 @@
       </div>
 
       <div class="tab" id="tab-transcript">
-        <p class="hint" id="listen-message">Choose the microphone (or the mixer's USB input), then start.</p>
+        <div class="row between">
+          <p class="hint" id="listen-message">Choose the microphone (or the mixer's USB input), then start.</p>
+          <button class="btn subtle small" id="btn-transcript-clear" title="Empty the transcript. Detections stay." hidden>Clear</button>
+        </div>
         <div id="transcript" class="transcript" aria-live="off">
           <p class="placeholder">What the preacher says appears here, with Bible references highlighted.</p>
         </div>
@@ -261,6 +269,22 @@
           <input type="range" id="quoted-threshold" min="0.4" max="0.95" step="0.01" value="0.65">
           <p class="hint">Lower finds more quotes but also more wrong guesses. Higher is stricter.</p>
           <p class="hint" id="quoted-hint"></p>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Confirmation before wiping everything -->
+  <dialog id="fresh-dialog" class="dialog small" aria-labelledby="fresh-title">
+    <form method="dialog">
+      <div class="dialog-head"><h2 id="fresh-title">Start fresh?</h2></div>
+      <div class="dialog-body">
+        <p>This empties the transcript and the list of detections, and clears the projector.
+           Use it before a new sermon or a new service.</p>
+        <p class="hint">Listening is not stopped, and your settings are kept.</p>
+        <div class="dialog-actions">
+          <button class="btn" value="cancel">Cancel</button>
+          <button class="btn primary" value="confirm" id="btn-fresh-confirm">Start fresh</button>
         </div>
       </div>
     </form>

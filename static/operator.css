@@ -467,3 +467,11 @@ mark {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+/* ------------------------------------------- clear transcript / start fresh -- */
+.row.between { justify-content: space-between; min-height: 28px; }
+.row.between .hint { min-width: 0; }
+.dialog.small { width: min(420px, calc(100vw - 32px)); }
+.dialog.small .dialog-head { padding: 20px 24px 8px; }
+.dialog.small p + p { margin-top: 8px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }

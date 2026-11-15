@@ -25,6 +25,7 @@
     searchBox: $("searchbox"), searchPop: $("search-pop"),
     listenLabel: $("btn-listen-label"), listenIcon: $("btn-listen-icon"), showLabel: $("btn-show-label"),
     segUi: $("seg-ui"),
+    transcriptClear: $("btn-transcript-clear"), fresh: $("btn-fresh"), freshDialog: $("fresh-dialog"),
     detectText: $("detect-text"), detectButton: $("btn-detect"),
     detectMarked: $("detect-marked"), detections: $("detections"),
     // listening
@@ -460,10 +461,35 @@
 
   // ------------------------------------------------------------ live transcript
   const lines = new Map();   // line id -> <p>
+  const TRANSCRIPT_PLACEHOLDER = "What the preacher says appears here, with Bible references highlighted.";
+
+  /** Empty the transcript panel (the server tells every operator screen to do this). */
+  function emptyTranscript() {
+    lines.clear();
+    el.transcript.textContent = "";
+    el.transcript.appendChild(make("p", "placeholder", TRANSCRIPT_PLACEHOLDER));
+    el.transcriptClear.hidden = true;
+  }
+  el.transcriptClear.addEventListener("click", () => api("/api/transcript/clear", {}));
+
+  // Start fresh: confirm first, because it also clears the projector.
+  el.fresh.addEventListener("click", () => el.freshDialog.showModal());
+  // The confirm button itself triggers the reset (the dialog closes through its form).
+  $("btn-fresh-confirm").addEventListener("click", async () => {
+    const done = await api("/api/session/reset", {});
+    if (!done) return;
+    selected = null;
+    selectedAuto = false;
+    results = [];
+    el.search.value = "";
+    renderSelected();
+    toast("Ready for a new sermon.");
+  });
 
   function showLine(line) {
     const placeholder = el.transcript.querySelector(".placeholder");
     if (placeholder) placeholder.remove();
+    el.transcriptClear.hidden = false;
     const nearBottom = el.transcript.scrollHeight - el.transcript.scrollTop - el.transcript.clientHeight < 60;
     let p = lines.get(line.id);
     if (!p) {
@@ -568,7 +594,7 @@
     const tag = target.tagName;
     const typing = (tag === "INPUT" && target.type !== "checkbox" && target.type !== "range")
       || tag === "TEXTAREA" || tag === "SELECT";
-    if (typing || el.settings.open || event.ctrlKey || event.altKey || event.metaKey) return;
+    if (typing || el.settings.open || el.freshDialog.open || event.ctrlKey || event.altKey || event.metaKey) return;
     switch (event.key) {
       case " ": event.preventDefault(); showSelected(); break;
       case "Escape": clearScreen(); break;
@@ -676,6 +702,7 @@
         case "level": el.level.style.width = Math.round(message.value * 100) + "%"; break;
         case "transcript": showLine(message); break;
         case "transcript_history": message.lines.forEach(showLine); break;
+        case "transcript_clear": emptyTranscript(); break;
         case "listen":
           if (state) { state.listen = message; renderListen(); }
           break;
