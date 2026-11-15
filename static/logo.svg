@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1470 1150" role="img" aria-label="Ouranòs Pro">
+  <!-- Ouranòs-Pro logo: white monoline wordmark on a sky gradient (bright blue, cyan glow, deep navy). -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="0.25">
+      <stop offset="0" stop-color="#0d5bff"/>
+      <stop offset="0.42" stop-color="#0a3be6"/>
+      <stop offset="0.68" stop-color="#0a1466"/>
+      <stop offset="1" stop-color="#06083a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.12" cy="1.02" r="0.75">
+      <stop offset="0" stop-color="#4ff0dc"/>
+      <stop offset="0.45" stop-color="#2bb8ea" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#0d5bff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="shade" cx="1" cy="0.2" r="0.8">
+      <stop offset="0" stop-color="#05062e"/>
+      <stop offset="1" stop-color="#05062e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1470" height="1150" fill="url(#sky)"/>
+  <rect width="1470" height="1150" fill="url(#glow)"/>
+  <rect width="1470" height="1150" fill="url(#shade)"/>
+
+  <!-- wordmark: "ouranòs" -->
+  <g transform="translate(408 515) scale(1.12)" fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="30" cy="50" r="30"/>
+    <path d="M82 20v30a30 30 0 0 0 60 0M142 20v60"/>
+    <path d="M164 80V50a30 30 0 0 1 30-30"/>
+    <circle cx="246" cy="50" r="30"/>
+    <path d="M276 20v60"/>
+    <path d="M298 80V50a30 30 0 0 1 60 0v30"/>
+    <circle cx="410" cy="50" r="30"/>
+    <path d="M398 -8l14 12"/>
+    <path d="M491.100 29.900A15 15 0 1 0 477 50A15 15 0 1 1 462.900 70.100"/>
+  </g>
+  <text x="990" y="598" fill="#ffffff" font-family="'Segoe UI Variable Text','Segoe UI',system-ui,sans-serif" font-size="30" letter-spacing="1">pro</text>
+</svg>

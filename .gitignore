@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+logs/
+data/bible.sqlite
+data/bible.sqlite.tmp
+data/sources/
+data/embeddings/
+data/settings.json
+models/
+data/backgrounds/
+dist/
+runtime/

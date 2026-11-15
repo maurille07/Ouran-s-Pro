@@ -1,0 +1,153 @@
+/* Ouranòs-Pro — projector screen.
+   All sizes are relative to the viewport so it looks the same on any projector. */
+
+:root {
+  --bg: radial-gradient(ellipse at 50% 35%, #161b26 0%, #07090d 75%);
+  --fg: #f5f2ea;
+  --accent: #d6b46c;
+  --shadow: none;
+  --fade: 380ms;
+}
+
+/* --- Themes -------------------------------------------------------------- */
+body[data-theme="dark"] {
+  --bg: radial-gradient(ellipse at 50% 35%, #161b26 0%, #07090d 75%);
+  --fg: #f5f2ea;
+  --accent: #d6b46c;
+}
+body[data-theme="light"] {
+  --bg: linear-gradient(180deg, #fbf9f3 0%, #efeadd 100%);
+  --fg: #1f1c16;
+  --accent: #8c6a1e;
+}
+body[data-theme="church"] {
+  --bg: radial-gradient(ellipse at 50% 30%, #17377a 0%, #0a1c45 55%, #050f28 100%);
+  --fg: #ffffff;
+  --accent: #e8c15a;
+}
+
+/* --- Overlay modes for OBS: /display?bg=transparent or ?bg=green ----------- */
+body[data-bg="transparent"] { --bg: transparent; --fg: #ffffff; --accent: #f0cd6e;
+  --shadow: 0 0.06em 0.12em rgba(0,0,0,.95), 0 0 0.5em rgba(0,0,0,.8); }
+body[data-bg="green"] { --bg: #00b140; --fg: #ffffff; --accent: #ffe08a;
+  --shadow: 0 0.06em 0.1em rgba(0,0,0,.9); }
+
+/* --- Background image (Settings > Projector). A dark veil keeps the text readable. --- */
+body[data-image]:not([data-bg]) {
+  --bg: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), var(--image) center / cover no-repeat;
+  --fg: #ffffff;
+  --accent: #f0cd6e;
+  --shadow: 0 0.05em 0.14em rgba(0, 0, 0, 0.85);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  cursor: none;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Georgia, "Cambria", "Times New Roman", serif;
+  transition: background 600ms ease, color 600ms ease;
+}
+
+/* --- Stage ---------------------------------------------------------------- */
+.stage {
+  position: fixed;
+  inset: 0;
+  padding: 7vh 6vw 8vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity var(--fade) ease;
+}
+.stage.is-hidden { opacity: 0; }
+#measure { visibility: hidden; pointer-events: none; transition: none; }
+
+.content {
+  width: 100%;
+  display: flex;
+  gap: 5vw;
+  align-items: center;
+  justify-content: center;
+  text-shadow: var(--shadow);
+}
+
+.panel {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 78vw;
+  text-align: center;
+}
+.content.two .panel { text-align: left; max-width: none; }
+.content.two .panel + .panel {
+  border-left: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  padding-left: 5vw;
+}
+
+.verse-text {
+  font-size: 1em;
+  line-height: 1.34;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+.verse-text sup {
+  font-size: 0.48em;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-weight: 600;
+  color: var(--accent);
+  margin-right: 0.3em;
+  vertical-align: 0.75em;
+  line-height: 0;
+}
+
+.reference {
+  margin-top: 0.9em;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.5em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.reference .translation { opacity: 0.75; font-weight: 400; }
+.reference::before {
+  content: "";
+  display: block;
+  width: 3.2em;
+  height: 2px;
+  margin: 0 auto 0.75em;
+  background: var(--accent);
+  opacity: 0.7;
+}
+.content.two .reference::before { margin-left: 0; }
+
+/* --- Page indicator + black screen --------------------------------------- */
+#pager {
+  position: fixed;
+  right: 3vw;
+  bottom: 3vh;
+  font: 600 2.1vh "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  opacity: 0.75;
+  text-shadow: var(--shadow);
+}
+
+#black {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--fade) ease;
+}
+body.is-black #black { opacity: 1; }
+/* In overlay mode "black" just hides the text (a black box would cover the stream). */
+body[data-bg].is-black #black { opacity: 0; }

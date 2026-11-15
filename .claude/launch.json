@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ouranos-pro",
+      "runtimeExecutable": ".venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8765"],
+      "port": 8765
+    },
+    {
+      "name": "ouranos-pro-testwav",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "set OURANOS_TEST_WAV=tests\\data\\sermon_quotes_en.wav&& .venv\\Scripts\\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8765"],
+      "port": 8765
+    }
+  ]
+}

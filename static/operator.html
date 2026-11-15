@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ouranòs-Pro</title>
+  <link rel="icon" href="/static/icon.png">
+  <link rel="stylesheet" href="/static/operator.css">
+  <script>
+    // Apply the saved light/dark choice before the page paints (no flash).
+    try { document.documentElement.dataset.ui = localStorage.getItem("ouranos-ui") || "system"; } catch (e) {}
+  </script>
+</head>
+<body>
+  <!-- Icons (drawn once, reused with <use>) -->
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m14.5 5-7 7 7 7"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 5 7 7-7 7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-present" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M12 13.5v-6m-2.5 2.5L12 7.5l2.5 2.5M8.5 20h7"/></symbol>
+    <symbol id="i-screen" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M8.5 20h7M12 16.5V20"/></symbol>
+    <symbol id="i-blank" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="m9.5 8 5 5m0-5-5 5M8.5 20h7"/></symbol>
+    <symbol id="i-black" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="12" rx="2" fill="currentColor"/><path d="M8.5 20h7"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><path d="M13.5 5H19v5.5M19 5l-8 8M10 6.5H6.5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V14"/></symbol>
+  </svg>
+
+  <!-- Title bar: brand, search, connection status -->
+  <header class="titlebar">
+    <div class="brand" role="img" aria-label="Ouranòs Pro">
+      <!-- The wordmark is drawn, not typed: the same letters as static/logo.svg -->
+      <svg class="wordmark" viewBox="-8 -18 508 108" aria-hidden="true">
+        <circle cx="30" cy="50" r="30"/>
+        <path d="M82 20v30a30 30 0 0 0 60 0M142 20v60"/>
+        <path d="M164 80V50a30 30 0 0 1 30-30"/>
+        <circle cx="246" cy="50" r="30"/>
+        <path d="M276 20v60"/>
+        <path d="M298 80V50a30 30 0 0 1 60 0v30"/>
+        <circle cx="410" cy="50" r="30"/>
+        <path d="M398 -8l14 12"/>
+        <path d="M491.100 29.900A15 15 0 1 0 477 50A15 15 0 1 1 462.900 70.100"/>
+      </svg>
+      <span class="brand-pro" aria-hidden="true">pro</span>
+    </div>
+
+    <div class="searchbox" id="searchbox">
+      <svg aria-hidden="true"><use href="#i-search"/></svg>
+      <input id="search" type="search" autocomplete="off" spellcheck="false"
+             placeholder="Search the Bible — jn 3 16, romains 8:28, God so loved" aria-label="Search the Bible">
+      <kbd title="Press / to search">/</kbd>
+      <div class="search-pop" id="search-pop" hidden>
+        <ul id="results" class="results" aria-label="Search results"></ul>
+        <p class="pop-foot"><kbd>↑</kbd> <kbd>↓</kbd> to choose · <kbd>Enter</kbd> to show on the projector · <kbd>Esc</kbd> to close</p>
+      </div>
+    </div>
+
+    <div class="status">
+      <span class="pill" id="server-pill"><i class="dot"></i><span>Connecting…</span></span>
+      <span class="pill" id="display-pill"><i class="dot"></i><span>Projector: not open</span></span>
+    </div>
+  </header>
+
+  <!-- Command bar -->
+  <div class="commandbar" role="toolbar" aria-label="Main commands">
+    <div class="group">
+      <button class="btn primary" id="btn-listen">
+        <svg aria-hidden="true"><use id="btn-listen-icon" href="#i-mic"/></svg><span id="btn-listen-label">Start listening</span>
+      </button>
+      <select id="mic" aria-label="Microphone" title="Microphone"></select>
+      <div class="meter" title="Microphone level" aria-hidden="true"><div id="level"></div></div>
+    </div>
+
+    <div class="group">
+      <span class="group-label" id="lbl-translation">Bible</span>
+      <div class="segmented" id="seg-translation" role="group" aria-labelledby="lbl-translation">
+        <button data-value="KJV" title="King James Version (English)">KJV</button>
+        <button data-value="LSG" title="Louis Segond 1910 (Français)">LSG</button>
+        <button data-value="both" title="Both, side by side">Both</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <span class="group-label" id="lbl-mode">Display</span>
+      <div class="segmented" id="seg-mode" role="group" aria-labelledby="lbl-mode"
+           title="Manual: you press Show. Auto: spoken references appear on the projector by themselves.">
+        <button data-value="manual">Manual</button>
+        <button data-value="auto">Auto</button>
+      </div>
+    </div>
+
+    <div class="group end">
+      <a class="btn subtle" href="/display" target="ouranos-display"
+         title="Open the projector screen in a new window. Drag it to the projector and double-click it for full screen.">
+        <svg aria-hidden="true"><use href="#i-open"/></svg><span>Projector screen</span>
+      </a>
+      <button class="btn subtle" id="btn-settings">
+        <svg aria-hidden="true"><use href="#i-settings"/></svg><span>Settings</span>
+      </button>
+    </div>
+  </div>
+
+  <div id="banner" class="banner" role="alert" hidden></div>
+
+  <main class="workspace">
+    <!-- 1. What is being heard ------------------------------------------- -->
+    <section class="pane pane-heard" aria-label="Listening">
+      <div class="pane-head">
+        <div class="pivot" id="tabs" role="tablist">
+          <button role="tab" data-tab="transcript" class="active">Live transcript</button>
+          <button role="tab" data-tab="detect" title="Type or paste sermon text to test detection without a microphone">Test with text</button>
+        </div>
+        <span id="listen-badge" class="badge">Stopped</span>
+      </div>
+
+      <div class="tab" id="tab-transcript">
+        <p class="hint" id="listen-message">Choose the microphone (or the mixer's USB input), then start.</p>
+        <div id="transcript" class="transcript" aria-live="off">
+          <p class="placeholder">What the preacher says appears here, with Bible references highlighted.</p>
+        </div>
+      </div>
+
+      <div class="tab" id="tab-detect" hidden>
+        <textarea id="detect-text" spellcheck="false" aria-label="Text to scan for Bible references"
+                  placeholder="Type or paste what a preacher would say, for example:&#10;&#10;Turn with me to Romans chapter eight. Look at verse 28. Puis Jean trois seize."></textarea>
+        <div class="row">
+          <button class="btn" id="btn-detect">Find references</button>
+          <span class="hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
+        </div>
+        <div id="detect-marked" class="marked" hidden></div>
+        <ul id="detections" class="results" aria-label="Detected references"></ul>
+      </div>
+    </section>
+
+    <!-- 2. Detected verses -------------------------------------------------- -->
+    <section class="pane pane-queue" aria-label="Detections">
+      <div class="pane-head">
+        <h2>Detections <span id="queue-count" class="count"></span></h2>
+        <button class="btn subtle small" id="btn-queue-clear" title="Remove all detections">Clear list</button>
+      </div>
+      <p class="notice" id="auto-note" hidden>Auto is on. Spoken references go straight to the projector; quoted verses and whole chapters wait for you.</p>
+      <ul id="queue" class="queue" aria-label="Detected verses"></ul>
+    </section>
+
+    <!-- 3. Selected verse + projector -------------------------------------- -->
+    <section class="pane pane-reading" aria-label="Selected verse">
+      <div class="pane-head">
+        <h2>Selected verse</h2>
+        <span class="hint keys"><kbd>Space</kbd> show · <kbd>←</kbd> <kbd>→</kbd> verse · <kbd>Esc</kbd> clear</span>
+      </div>
+      <div id="selected" class="selected empty">
+        <p class="placeholder">Click a detection or a search result to preview it here.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-prev" title="Previous verse (←)">
+          <svg aria-hidden="true"><use href="#i-left"/></svg><span>Previous</span>
+        </button>
+        <button class="btn primary large" id="btn-show" title="Show on the projector (Space)">
+          <svg aria-hidden="true"><use href="#i-present"/></svg><span id="btn-show-label">Show</span>
+        </button>
+        <button class="btn" id="btn-next" title="Next verse (→)">
+          <span>Next</span><svg aria-hidden="true"><use href="#i-right"/></svg>
+        </button>
+      </div>
+
+      <div class="projector">
+        <div class="monitor"><iframe src="/display?preview=1" title="Projector preview" tabindex="-1"></iframe></div>
+        <div class="projector-info">
+          <div class="projector-title">On the projector <span id="live-badge" class="badge">Clear</span></div>
+          <div id="live-ref" class="live-ref">Nothing showing</div>
+          <span class="pager" id="pager" hidden>
+            <button class="btn subtle icon" id="btn-page-prev" title="Previous page (PgUp)" aria-label="Previous page"><svg aria-hidden="true"><use href="#i-left"/></svg></button>
+            <span id="page-label">1 / 1</span>
+            <button class="btn subtle icon" id="btn-page-next" title="Next page (PgDn)" aria-label="Next page"><svg aria-hidden="true"><use href="#i-right"/></svg></button>
+          </span>
+          <div class="projector-buttons">
+            <button class="btn small" id="btn-clear" title="Remove the verse from the projector (Esc)">
+              <svg aria-hidden="true"><use href="#i-blank"/></svg><span>Clear</span>
+            </button>
+            <button class="btn small" id="btn-black" title="Make the projector fully black (B). Press again to come back.">
+              <svg aria-hidden="true"><use href="#i-black"/></svg><span>Black</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings ---------------------------------------------------------------- -->
+  <dialog id="settings" class="dialog" aria-labelledby="settings-title">
+    <form method="dialog">
+      <div class="dialog-head">
+        <h2 id="settings-title">Settings</h2>
+        <button class="btn subtle icon" value="close" aria-label="Close settings"><svg aria-hidden="true"><use href="#i-close"/></svg></button>
+      </div>
+
+      <div class="dialog-body">
+        <h3>This screen</h3>
+        <div class="field">
+          <label id="lbl-ui">Appearance</label>
+          <div class="segmented" id="seg-ui" role="group" aria-labelledby="lbl-ui">
+            <button type="button" data-value="system" title="Follows the computer's setting">Automatic</button>
+            <button type="button" data-value="light">Light</button>
+            <button type="button" data-value="dark" title="Easier on the eyes in a dark room">Dark</button>
+          </div>
+        </div>
+
+        <h3>Projector</h3>
+        <div class="field">
+          <label id="lbl-theme">Theme</label>
+          <div class="segmented" id="seg-theme" role="group" aria-labelledby="lbl-theme">
+            <button type="button" data-value="dark">Dark</button>
+            <button type="button" data-value="light">Light</button>
+            <button type="button" data-value="church">Blue &amp; gold</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="font-scale">Text size <span class="value" id="font-scale-label">100%</span></label>
+          <input type="range" id="font-scale" min="0.6" max="1.6" step="0.05" value="1">
+        </div>
+        <div class="field">
+          <label for="background">Background picture</label>
+          <div class="row">
+            <select id="background" aria-label="Background picture"></select>
+            <button type="button" class="btn" id="btn-background-add">Add picture…</button>
+            <input type="file" id="background-file" accept=".jpg,.jpeg,.png,.webp" hidden>
+          </div>
+          <p class="hint">Shown behind the verse, slightly darkened. Choose “None” to use the theme.</p>
+        </div>
+        <label class="check"><input type="checkbox" id="verse-numbers"><span>Show verse numbers in passages</span></label>
+
+        <h3>Listening</h3>
+        <div class="field">
+          <label id="lbl-model">Speech model <span class="value">bigger is more accurate, but slower</span></label>
+          <div class="segmented" id="seg-model" role="group" aria-labelledby="lbl-model">
+            <button type="button" data-value="base" title="Fastest. Best for older laptops.">Base</button>
+            <button type="button" data-value="small" title="More accurate, needs a faster computer.">Small</button>
+            <button type="button" data-value="medium" title="Most accurate, needs a powerful computer or a graphics card.">Medium</button>
+          </div>
+          <p class="hint" id="model-hint"></p>
+        </div>
+        <div class="field">
+          <label id="lbl-language">Sermon language</label>
+          <div class="segmented" id="seg-language" role="group" aria-labelledby="lbl-language">
+            <button type="button" data-value="auto" title="Detects English or French by itself (good for mixed sermons)">Automatic</button>
+            <button type="button" data-value="en">English</button>
+            <button type="button" data-value="fr">Français</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="dedupe">Do not suggest the same verse again within <span class="value" id="dedupe-label">20 s</span></label>
+          <input type="range" id="dedupe" min="0" max="120" step="5" value="20">
+        </div>
+
+        <h3>Quoted verses</h3>
+        <label class="check"><input type="checkbox" id="quoted-on"><span>Also detect verses that are quoted without a reference</span></label>
+        <div class="field">
+          <label for="quoted-threshold">Minimum match score <span class="value" id="quoted-threshold-label">65%</span></label>
+          <input type="range" id="quoted-threshold" min="0.4" max="0.95" step="0.01" value="0.65">
+          <p class="hint">Lower finds more quotes but also more wrong guesses. Higher is stricter.</p>
+          <p class="hint" id="quoted-hint"></p>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/static/operator.js"></script>
+</body>
+</html>
